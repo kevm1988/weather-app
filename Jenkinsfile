@@ -67,6 +67,10 @@ pipeline {
                 container('kubectl') {
                     script {
                         echo 'Deploying to Kubernetes...'
+                        sh 'whoami'      // Check the user running the shell
+                        sh 'pwd'         // Print the current directory
+                        sh 'ls -la'      // List files in the current directory
+                        sh 'kubectl version --client'   // Check if kubectl is installed
                         sh 'kubectl apply -f k8s-deployment.yaml'
                     }
                 }
