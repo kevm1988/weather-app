@@ -35,6 +35,7 @@ pipeline {
             steps {
                 echo 'Deploying to Kubernetes...'
                 // Add your kubectl commands here for deployment
+                sh 'kubectl apply -f k8s-deployment.yaml'
             }
         }
     }
