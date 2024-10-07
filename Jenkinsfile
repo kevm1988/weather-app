@@ -1,7 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            label 'docker-kubectl-agent'
+            label 'docker-agent'
             yaml """
             apiVersion: v1
             kind: Pod
@@ -15,15 +15,6 @@ pipeline {
                 volumeMounts:
                 - name: docker-sock
                   mountPath: /var/run/docker.sock
-              - name: kubectl
-                image: bitnami/kubectl:1.20.0
-                command:
-                - cat
-                tty: true
-              volumes:
-              - name: docker-sock
-                hostPath:
-                  path: /var/run/docker.sock
             """
         }
     }
@@ -62,19 +53,21 @@ pipeline {
                 }
             }
         }
-        stage('Deploy to Kubernetes') {
-            steps {
-                container('kubectl') {
-                    script {
-                        echo 'Deploying to Kubernetes...'
-                        sh 'whoami'      // Check the user running the shell
-                        sh 'pwd'         // Print the current directory
-                        sh 'ls -la'      // List files in the current directory
-                        sh 'kubectl version --client'   // Check if kubectl is installed
-                        sh 'kubectl apply -f k8s-deployment.yaml'
-                    }
+stage('Deploy to Kubernetes') {
+    steps {
+        container('docker') {
+            script {
+                echo 'Installing kubectl...'
+                sh '''
+                curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+                chmod +x kubectl
+                mv kubectl /usr/local/bin/kubectl
+                kubectl version --client
+                kubectl apply -f k8s-deployment.yaml
+                '''
+                     }
+                 }
                 }
             }
         }
-    }
 }
