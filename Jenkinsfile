@@ -62,20 +62,42 @@ pipeline {
                 }
             }
         }
-stage('Deploy to Kubernetes') {
-    steps {
-        container('docker') {
-            script {
-                echo 'Installing kubectl...'
-                sh '''
-                curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-                chmod +x kubectl
-                mv kubectl /usr/local/bin/kubectl
-                kubectl version --client
-                kubectl apply -f k8s-deployment.yaml
-                '''
-                     }
-                 }
+The error message you're seeing (curl: not found) indicates that the docker:19.03.12 container image you're using doesn't have curl installed by default. To fix this, you'll need to install curl before attempting to download and install kubectl.
+
+Here’s how you can modify your pipeline to first install curl and then proceed with installing kubectl:
+Modified Pipeline to Install curl and kubectl:
+
+groovy
+
+The error message you're seeing (curl: not found) indicates that the docker:19.03.12 container image you're using doesn't have curl installed by default. To fix this, you'll need to install curl before attempting to download and install kubectl.
+
+Here’s how you can modify your pipeline to first install curl and then proceed with installing kubectl:
+Modified Pipeline to Install curl and kubectl:
+
+groovy
+
+            stage('Deploy to Kubernetes') {
+                steps {
+                    container('docker') {
+                        script {
+                            echo 'Installing curl and kubectl...'
+                            sh '''
+                            # Install curl
+                            apk update && apk add curl
+
+                            # Install kubectl
+                            curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+                            chmod +x kubectl
+                            mv kubectl /usr/local/bin/kubectl
+
+                            # Verify kubectl installation
+                            kubectl version --client
+
+                            # Deploy to Kubernetes
+                            kubectl apply -f k8s-deployment.yaml
+                            '''
+                        }
+                    }
                 }
             }
         }
