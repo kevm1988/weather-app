@@ -28,7 +28,7 @@ pipeline {
         }
     }
     environment {
-        DOCKER_IMAGE = "kevinmeikle1988/weather-app"
+        DOCKER_IMAGE = "kevinmeikle88/weather-app"
     }
     stages {
         stage('Clone repository') {
