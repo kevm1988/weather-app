@@ -2,7 +2,7 @@ pipeline {
     agent {
         // Create a temporary docker agent to run docker commands from
         kubernetes {
-            label 'docker-kubectl-agent
+            label 'docker-kubectl-agent'
             yaml """
             apiVersion: v1
             kind: Pod
