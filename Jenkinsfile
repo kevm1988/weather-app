@@ -1,6 +1,5 @@
 pipeline {
     agent {
-        // Create a temporary docker agent to run docker commands from
         kubernetes {
             label 'docker-kubectl-agent'
             yaml """
@@ -16,12 +15,8 @@ pipeline {
                 volumeMounts:
                 - name: docker-sock
                   mountPath: /var/run/docker.sock
-              volumes:
-              - name: docker-sock
-                hostPath:
-                  path: /var/run/docker.sock
               - name: kubectl
-                image: bitnami/kubectl:latest
+                image: bitnami/kubectl:1.20.0
                 command:
                 - cat
                 tty: true
