@@ -20,7 +20,7 @@ pipeline {
               - name: docker-sock
                 hostPath:
                   path: /var/run/docker.sock
-            - name: kubectl
+              - name: kubectl
                 image: bitnami/kubectl:latest
                 command:
                 - cat
