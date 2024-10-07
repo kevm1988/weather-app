@@ -6,7 +6,7 @@ pipeline {
     stages {
         stage('Clone repository') {
             steps {
-                git 'https://github.com/kevm1988/weather-app.git'
+                git branch: 'main', url: 'https://github.com/kevm1988/weather-app.git'
             }
         }
         stage('Build Docker image') {
