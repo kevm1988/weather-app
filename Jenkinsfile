@@ -1,5 +1,28 @@
 pipeline {
-    agent any
+    agent {
+        // Create a temporary docker agent to run docker commands from
+        kubernetes {
+            label 'docker-agent'
+            yaml """
+            apiVersion: v1
+            kind: Pod
+            spec:
+              containers:
+              - name: docker
+                image: docker:19.03.12
+                command:
+                - cat
+                tty: true
+                volumeMounts:
+                - name: docker-sock
+                  mountPath: /var/run/docker.sock
+              volumes:
+              - name: docker-sock
+                hostPath:
+                  path: /var/run/docker.sock
+            """
+        }
+    }
     environment {
         DOCKER_IMAGE = "kevinmeikle1988/weather-app"
     }
@@ -11,8 +34,10 @@ pipeline {
         }
         stage('Build Docker image') {
             steps {
-                script {
-                    dockerImage = docker.build(DOCKER_IMAGE)
+                container('docker') {
+                    script {
+                        dockerImage = docker.build(DOCKER_IMAGE)
+                    }
                 }
             }
         }
@@ -24,9 +49,11 @@ pipeline {
         }
         stage('Push to Docker Hub') {
             steps {
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials-id') {
-                        dockerImage.push()
+                container('docker') {
+                    script {
+                        docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials-id') {
+                            dockerImage.push()
+                        }
                     }
                 }
             }
@@ -34,7 +61,6 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 echo 'Deploying to Kubernetes...'
-                // Add your kubectl commands here for deployment
                 sh 'kubectl apply -f k8s-deployment.yaml'
             }
         }
