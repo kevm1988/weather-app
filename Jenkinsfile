@@ -20,6 +20,15 @@ pipeline {
               - name: docker-sock
                 hostPath:
                   path: /var/run/docker.sock
+            - name: kubectl
+                image: bitnami/kubectl:latest
+                command:
+                - cat
+                tty: true
+              volumes:
+              - name: docker-sock
+                hostPath:
+                  path: /var/run/docker.sock
             """
         }
     }
@@ -60,8 +69,12 @@ pipeline {
         }
         stage('Deploy to Kubernetes') {
             steps {
-                echo 'Deploying to Kubernetes...'
-                sh 'kubectl apply -f k8s-deployment.yaml'
+                container('kubectl') {
+                    script {
+                        echo 'Deploying to Kubernetes...'
+                        sh 'kubectl apply -f k8s-deployment.yaml'
+                    }
+                }
             }
         }
     }
