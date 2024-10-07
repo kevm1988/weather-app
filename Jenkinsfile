@@ -1,7 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            label 'docker-agent'
+            label 'docker-kubectl-agent'
             yaml """
             apiVersion: v1
             kind: Pod
@@ -15,6 +15,15 @@ pipeline {
                 volumeMounts:
                 - name: docker-sock
                   mountPath: /var/run/docker.sock
+              - name: kubectl
+                image: bitnami/kubectl:1.20.0
+                command:
+                - cat
+                tty: true
+              volumes:
+              - name: docker-sock
+                hostPath:
+                  path: /var/run/docker.sock
             """
         }
     }
